@@ -1,12 +1,14 @@
 var initInfo;
 var parentDiv;
 var curIndex = 1;
+var keywords = [];
 // receive message from background.js when current page needs to be injected.
 chrome.runtime.onMessage.addListener(function (msg, _, sendResponse) {
 	switch(msg.tag) {
 		case "SET_ENGINE":
 			curIndex = 1;
 			initInfo = msg.initInfo;
+			keywords = unifyKeywords(decodeURIComponent(msg.searchString).split(" "));
 			setTimeout(init, 1000);
 			break;
 		case "INSERT_ITEM":
@@ -31,7 +33,6 @@ function init() {
 
 // add item title and its content
 function addItemContent(item) {
-//	alert("insert");
 	// add title
 	var li = $("<li/>").appendTo(parentDiv);
 	var title = $("<a/>")
@@ -44,17 +45,21 @@ function addItemContent(item) {
 		.text(curIndex + ". " + item.title).appendTo(li);
 	curIndex++;
 	
+	// get highlighted string
+	var tempHtml = item.html.replace(/(<([^>]+)>)/ig,"").replace(/&nbsp;/g, " ").replace(/&quot;/g, '"')
+			.substring(0, 300);
+	var result = highlightString(tempHtml);
+	
 	var subContent = $("<div>")
 		.css({
 			margin: "5px",
 			display: "block",
 			fontSize: "small"
 		})
-		.text(item.html
-			.replace(/(<([^>]+)>)/ig,"").replace(/&nbsp;/g, " ").replace(/&quot;/g, '"')
-			.substring(0, 300)).appendTo(li);
+		.html(result).appendTo(li);
 }
 
+// create parent string
 function createParentDiv(insertTagName) {
 	// parent 
 	parentDiv = $("<div>")
@@ -71,4 +76,27 @@ function createParentDiv(insertTagName) {
 			margin: "20px"
 		});
 	$("#" + insertTagName).prepend(parentDiv);
+}
+
+// delete repeated keys
+function unifyKeywords(arr) {
+	var result  = [];
+	$.each(arr, function(id, key) {
+		if (result.indexOf(arr[id]) === -1)
+			result.push(arr[id]);
+	});
+	return result;
+} 
+
+// get highlighted string, find search string and add <b>
+function highlightString(str) {
+	var result = str;
+//	alert(keywords);
+	// get all keywords
+	$.each(keywords, function(id, key) {
+		var reg = new RegExp(key, "gi");
+		result = result.replace(reg, "<span style = 'background-color : yellow'>" + key + "</span>");
+	});
+//	alert(result);
+	return result;
 }

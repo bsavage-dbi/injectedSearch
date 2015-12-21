@@ -3,51 +3,17 @@
 
 <head>
 	<title>Set Page Color Popup</title>
-	<style>
-		body {
-			overflow: hidden;
-			min-width: 300px;
-			min-height: 200px;
-			margin: 0px;
-			padding: 0px;
-			background: white;
-		}
-		div.inputfield {
-			width: 100%;
-			height: 30px;
-		}
-		b {
-			float: left;
-			display: block;
-		}
-		input {
-			margin: 3px;
-			float: right;
-			display: block;
-		}
-		.inputdiv {
-			margin: 5px 5px 5px 0px;
-			padding-left: 20px;
-			float: right;
-		}
-		#spaces {
-			margin: 3px;
-			float: right;
-		}
-		button {
-			float: left;
-			margin: 5px;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="popup.css">
 	<script src="jquery-2.1.4.min.js"></script>
 </head>
+
 <body>
 	<h2 style="margin-left: 10px;"> Settings</h2>
 	<div class="inputdiv">
 		<div class="inputfield">
-			<b>Username:</b> 
+			<b>Username:</b>
 			<input type="text" id="username">
-		</div> 
+		</div>
 		<div class="inputfield">
 			<b>Password:</b>
 			<input type="password" id="password">
@@ -58,10 +24,10 @@
 		</div>
 		<div class="inputfield">
 			<b>Space Name:</b>
-			<select id = "spaces"></select>
+			<select id="spaces"></select>
 		</div>
-		<button id = "saveBtn">Save</button>
-		<button id = "cancelBtn">Cancel</button>
+		<button id="saveBtn">Save</button>
+		<button id="cancelBtn">Cancel</button>
 	</div>
 	<script src="popup.js"></script>
 </body>

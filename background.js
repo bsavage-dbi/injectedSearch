@@ -47,6 +47,28 @@ var authStr = "";
 // REST url prefix
 var _prefix = "";
 
+// read local setting when start
+chrome.runtime.onInstalled.addListener(function() {
+//	alert("Installed");
+});
+chrome.runtime.onStartup.addListener(function() {
+	alert("start");
+	chrome.storage.local.get(settings, function (result) {
+		settings = result;
+		alert(settings);
+		if (settings["usr"] === "" || settings["pwd"] === "" || settings["url"] === "") {
+			alert("wat");
+			////////////////////////////////////////////////////////////////////////////////!!!!!
+			settings["usr"] = "chaiyi";
+			settings["pwd"] = "chaiyi123";
+			settings["space"] = "all";
+			settings["url"] = "http://172.20.200.191:8003/";
+			////////////////////////////////////////////////////////////////////////////////!!!!!
+		}
+	});
+});
+
+
 // get searching string
 function getSearchString(input) {
 	// something more........
@@ -102,7 +124,6 @@ function readLocalStorage(searchString, tabId) {
 	chrome.storage.local.get(settings, function (result) {
 		settings = result;
 		if (settings["usr"] === "" || settings["pwd"] === "" || settings["url"] === "") {
-			alert("wat");
 			////////////////////////////////////////////////////////////////////////////////!!!!!
 			settings["usr"] = "chaiyi";
 			settings["pwd"] = "chaiyi123";
@@ -147,6 +168,7 @@ function sendRESTCall(searchString, tabId) {
 			chrome.tabs.sendMessage(tabId,
 				{
 					tag: "SET_ENGINE",
+					searchString: searchString,
 					initInfo:
 					{
 						totalSize: data.totalSize,
