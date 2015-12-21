@@ -1,38 +1,41 @@
 {
-  "name": "Inject DOM",
-  "description": "Inject Search Result of Confluence",
-  "version": "1",
-  "manifest_version": 2,
-  "background": {
-    "scripts": [
-      "background.js"
-    ],
-    "persistent": false
-  },
-  "browser_action": {
-    "default_icon": "icon-19.png",
-    "default_title": "Inject Search",
-    "default_popup": "popup.html"
-  },
-  "permissions": [
-    "tabs",
-    "declarativeContent"
-  ],
-  "icons": {
-    "48": "icon-48.png",
-    "128": "icon-128.png"
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "http://www.baidu.com/*",
-        "https://www.baidu.com/*",
-        "file:///*/*"
-      ],
-      "js": [
-        "jquery-2.1.4.min.js",
-        "content.js"
-      ]
-    }
-  ]
+	"name": "Inject DOM",
+	"description": "Inject Search Result of Confluence",
+	"version": "1",
+	"manifest_version": 2,
+	"background": {
+		"scripts": [
+			"jquery-2.1.4.min.js",
+			"background.js"
+		],
+		"persistent": false
+	},
+	"browser_action": {
+		"default_icon": "icon-19.png",
+		"default_title": "Inject Search",
+		"default_popup": "popup.html"
+	},
+	"permissions": [
+    	"tabs", "http://*/*", "https://*/*",	// tab 
+		"storage",	// for storage
+		"webNavigation"	// web loading status
+  	],
+	"icons": {
+		"48": "icon-48.png",
+		"128": "icon-128.png"
+	},
+	"omnibox": { "keyword" : "omnix" },
+	"content_scripts": [
+		{
+			"matches": [
+				// bug???????????
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"jquery-2.1.4.min.js",
+				"content.js"
+			]
+		}
+	]
 }
