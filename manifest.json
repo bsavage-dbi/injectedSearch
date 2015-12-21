@@ -1,0 +1,38 @@
+{
+  "name": "Inject DOM",
+  "description": "Inject Search Result of Confluence",
+  "version": "1",
+  "manifest_version": 2,
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": "icon-19.png",
+    "default_title": "Inject Search",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "tabs",
+    "declarativeContent"
+  ],
+  "icons": {
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://www.baidu.com/*",
+        "https://www.baidu.com/*",
+        "file:///*/*"
+      ],
+      "js": [
+        "jquery-2.1.4.min.js",
+        "content.js"
+      ]
+    }
+  ]
+}
