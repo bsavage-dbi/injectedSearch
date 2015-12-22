@@ -11,7 +11,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 
 // chrome event when current tab is updated
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-	if (changeInfo.status == "complete" && tabId == activeTabId) {
+	if (changeInfo.status == "complete") {
 		var searchString = getSearchString(tab.url);
 		if (searchString !== "") {
 			// first read local storage then send REST GET request
@@ -35,7 +35,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 // });
 
 // define search engine flag: Google or Baidu
-var engineFlag = "";
+var engineFlag;
 var maxResults = 5;
 var settings = {};
 settings["usr"] = "";
@@ -47,6 +47,26 @@ var authStr = "";
 // REST url prefix
 var _prefix = "";
 
+// search engine details
+var searchEngines = [
+	{
+		name: "Baidu",
+		info: {
+			searchTag: "wd=",
+			url: "www.baidu",
+			div: "content_right"
+		}
+	},
+	{
+		name: "Google",
+		info: {
+			searchTag: "q=",
+			url: "www.google",
+			div: "rhs"
+		}
+	}
+];
+
 // read local setting when start
 chrome.runtime.onInstalled.addListener(function() {
 //	alert("Installed");
@@ -55,7 +75,6 @@ chrome.runtime.onStartup.addListener(function() {
 	alert("start");
 	chrome.storage.local.get(settings, function (result) {
 		settings = result;
-		alert(settings);
 		if (settings["usr"] === "" || settings["pwd"] === "" || settings["url"] === "") {
 			alert("wat");
 			////////////////////////////////////////////////////////////////////////////////!!!!!
@@ -68,55 +87,21 @@ chrome.runtime.onStartup.addListener(function() {
 	});
 });
 
-
-// get searching string
 function getSearchString(input) {
-	// something more........
-	var tempString = getSearchStringBaidu(input);
-	if (tempString === "") {
-		tempString = getSearchStringGoogle(input);
-		if (tempString === "") {
-			return "";
-		} else {
-			engineFlag = "Google";
-		}
-	} else {
-		engineFlag = "Baidu";
-	}
+	var tempString = "";
+	$.each(searchEngines, function(id, item) {
+		if (input.indexOf(item.info.url) !== -1) {
+			var startIndex = input.indexOf(item.info.searchTag);
+			if (startIndex !== -1) {
+				startIndex += item.info.searchTag.length;
+				var endIndex = input.indexOf("&", startIndex);
+				tempString = input.substring(startIndex, endIndex);
+				engineFlag = item;
+				return false;
+			}
+		} 
+	});
 	return tempString;
-}
-// baidu search string
-function getSearchStringBaidu(input) {
-	if (input.indexOf("www.baidu.com") === -1) {
-		return "";
-	} else {
-		var startIndex = input.indexOf("wd=");
-		if (startIndex == -1) {
-			return "";
-		} else {
-			startIndex += 3;
-		}
-		var endIndex = input.indexOf("&", startIndex);
-		return input.substring(startIndex, endIndex);
-	}
-}
-// google search string
-function getSearchStringGoogle(input) {
-	if (input.indexOf("www.google") === -1) {
-		return "";
-	} else {
-		var startIndex = input.indexOf("q=");
-		if (startIndex == -1) {
-			return "";
-		} else {
-			startIndex += 2;
-		}
-		var endIndex = input.indexOf("&", startIndex);
-		if (endIndex == -1)
-			return input.substring(startIndex);
-		else
-			return input.substring(startIndex, endIndex);
-	}
 }
 
 // read local storage for searching
@@ -175,7 +160,7 @@ function sendRESTCall(searchString, tabId) {
 						engineFlag: engineFlag
 					}
 				});
-			// for each item to query information
+			// for each item, send REST call to query information
 			$.each(data.result, function (id, item) {
 				createContentDetails(tabId, item);
 			});
@@ -210,7 +195,8 @@ function createContentDetails(tabId, item) {
 						id: item.id,
 						title: item.title,
 						url: item.link[0].href,
-						html: data.body.value
+						html: data.body.value,
+						date: data.lastModifiedDate.friendly
 					}
 				});
 		},

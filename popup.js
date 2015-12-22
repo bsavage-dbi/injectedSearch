@@ -23,7 +23,23 @@
 		settings["space"] = $("#spaces").val();
 		
 		chrome.storage.local.set(settings, function () {
-			window.close();
+			$.ajax({
+			type: "GET",
+			url: settings["url"]  + "rest/prototype/1/space",
+			dataType: "json",
+			beforeSend: function (xhr) {
+				// authorization name and password encoded by btoa
+				// set name and password, (!!! if browser has already logged in Confluence, this field is invalid.)
+				var authStr = "Basic " + btoa(settings["usr"] + ":" + settings["pwd"]);
+				xhr.setRequestHeader("Authorization", authStr);
+			},
+			success: function (data) {
+			//	alert("Saving Successfully!");
+			},
+			error: function(xhr, errorText) {
+				alert("Saving error" + errorText);
+				window.close();
+			}});
         });
 	});
 	
