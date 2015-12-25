@@ -160,16 +160,64 @@ function sendRESTCall(searchString, tabId) {
 						engineFlag: engineFlag
 					}
 				});
+					
 			// for each item, send REST call to query information
-			$.each(data.result, function (id, item) {
-				createContentDetails(tabId, item);
-			});
+			getContentDetails(tabId, data.result, 0);
+			
+			// $.each(data.result, function (index, item) {
+			// 	createContentDetails(tabId, item);
+			// });
 		},
 		error: function (xhr, errorText) {
-			alert("failed");
+			createModalDialog("ERROR", "Connection failed: Cannot fetch confluence results.");
 		}
 	});
 }
+
+
+// GET content detail from Confluence for every search result
+function getContentDetails(tabId, items, index, length) {
+	if (index >= items.length) {
+		return;
+	}
+	var curItem = items[index];
+	var url = _prefix + "content/" + curItem.id;
+	
+	// send rest call
+	$.ajax({
+		type: "GET",
+		url: url,
+		dataType: "json",
+		beforeSend: function (xhr) {
+			// authorization name and password encoded by btoa
+			xhr.setRequestHeader("Authorization", authStr);//"Basic Y2hhaXlpOmNoYWl5aTEyMw==");
+		},
+		success: function (data) {
+			// if succeed send message to content.js
+			// tabId and searching result by JSON
+			chrome.tabs.sendMessage(tabId,
+				{
+					tag: "INSERT_ITEM",
+					itemInfo:
+					{
+						id: curItem.id,							// id 
+						title: curItem.title,					// title
+						url: curItem.link[0].href,				// url
+						html: data.body.value,					// content 
+						date: data.lastModifiedDate.friendly	// last modified
+					}
+				});
+				
+				// recursively GET next item
+				getContentDetails(tabId, items, index+1);
+		},
+		error: function (xhr, errorText) {
+			alert("failed");
+			getContentDetails(tabId, items, index+1);
+		}
+	});
+}
+
 
 // GET content detail from Confluence for every search result
 function createContentDetails(tabId, item) {
@@ -203,6 +251,26 @@ function createContentDetails(tabId, item) {
 		error: function (xhr, errorText) {
 			alert("failed");
 		}
+	});
+}
+
+// create a dialog in current tab by using injected script
+function createModalDialog(caption, msg) {
+	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+		chrome.tabs.executeScript(tabs[0].id, { file: "jquery-2.1.4.min.js" }, function () {
+			chrome.tabs.executeScript(tabs[0].id, 
+			{ 
+				code: "var msg = '" + msg + "';" 
+			   +"var caption= '" + caption + "';"
+			}, function () {
+				chrome.tabs.executeScript(tabs[0].id, { file: "modalDialog.js" }, function () {
+					// !important: window.close() should be called in here which is in this callback
+					// otherwise, the window will not function well
+					window.close();
+				});
+			});
+		});
+
 	});
 }
 

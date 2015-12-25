@@ -1,19 +1,18 @@
-(function () {
+	
+$(document).ready(function () {
+		 
 	// settings
 	var settings = {};
 	settings["usr"] = "";
 	settings["pwd"] = "";
 	settings["space"] = "";
 	settings["url"] = "";
-	// space name list
-	var spaceNameList;
-	
 	// get current settings if exists
 	getDefaultSettings();
 	
 	// get space names
 	getSpacesNames();
-	
+
 	// save current setting
 	$("#saveBtn").click(function () {
 		// get current setting
@@ -34,11 +33,10 @@
 				xhr.setRequestHeader("Authorization", authStr);
 			},
 			success: function (data) {
-			//	alert("Saving Successfully!");
+				createModalDialog("SUCCESS", "Saving successfully!");
 			},
 			error: function(xhr, errorText) {
-				alert("Saving error" + errorText);
-				window.close();
+				createModalDialog("ERROR", "Saving error: URL INVALID!");
 			}});
         });
 	});
@@ -111,7 +109,7 @@
 				$("#spaces").val(settings["space"]);
 			},
 			error: function (xhr, errorText) {
-				alert("failed");
+				createModalDialog("ERROR", "Fetch space name failed!");
 			}
 		});
 	}
@@ -123,4 +121,24 @@
 			text: title
 		}));
 	}
-})();
+	
+	// create a dialog in current tab by using injected script
+	function createModalDialog(caption, msg) {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			chrome.tabs.executeScript(tabs[0].id, {file: "jquery-2.1.4.min.js"}, function() {
+				chrome.tabs.executeScript(tabs[0].id, 
+				{
+					code: "var msg = '" + msg + "';"
+				  + "var caption='" + caption + "';"
+				}, function() {
+					chrome.tabs.executeScript(tabs[0].id, {file: "modalDialog.js"}, function() {
+						// !important: window.close() should be called in here which is in this callback
+						// otherwise, the window will not function well
+						window.close();
+					});
+				});
+			});
+			
+    	});
+	}
+});

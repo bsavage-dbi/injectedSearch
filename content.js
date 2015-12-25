@@ -17,11 +17,18 @@ chrome.runtime.onMessage.addListener(function (msg, _, sendResponse) {
 		case "INSERT_ITEM":
 			setTimeout(function() {addItemContentBlock(msg.itemInfo)}, 1000);
 			break;
+		case "MODAL_DIALOG":
+			alert("in");
+			addModalDialog(msg.greeting);
+			break;
 	}
 });
 
 // add parent div 
 function init() {
+	// remove previous injected dom
+	$(parentDiv).remove();
+	
 	// create DOM elements according to search result which is passed by background.js
 	// The tag in Baidu is #content-right, Google is #rhss
 	createParentDiv(initInfo.engineFlag.info.div);
@@ -99,7 +106,7 @@ function createParentDiv(insertTagName) {
 			"max-width": "456px",
 			minHeight: "100px",
 			border: "1px solid #ccc",
-			margin: "20px",
+			"margin-bottom": "5%",
 			"background-color": "#f5f5f5"
 		});	
 	$("#" + insertTagName).prepend(parentDiv);
@@ -202,12 +209,15 @@ function unifyKeywords(arr) {
 // get highlighted string, find search string and add <b>
 function highlightString(str) {
 	var result = str;
-//	alert(keywords);
 	// get all keywords
 	$.each(keywords, function(id, key) {
 		var reg = new RegExp(key, "gi");
 		result = result.replace(reg, "<span style = 'background-color : yellow'>" + key + "</span>");
 	});
-//	alert(result);
 	return result;
+}
+
+// create ModalDialog to show message
+function addModalDialog(msg) {
+	alert(msg);
 }

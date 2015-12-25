@@ -4,7 +4,8 @@ body {
 	min-height: 200px;
 	margin: 0px;
 	padding: 0px;
-	background: white;
+	font-family: Arial,sans-serif;
+	background: rgb(204, 204, 204);
 }
 
 div.inputfield {
@@ -13,10 +14,11 @@ div.inputfield {
 }
 
 b {
+	margin: 3px;
 	float: left;
 	display: block;
 }
-input {
+.input{
 	margin: 3px;
 	float: right;
 	display: block;
@@ -29,11 +31,15 @@ input {
 }
 	
 #spaces {
-	margin: 3px;
+	display: block;
 	float: right;
 }
 	
 button {
 	float: left;
-	margin: 5px;
+	margin: 5px 0 5px 20%;
+}
+
+.info {
+	margin: 0 0 0 5px;
 }

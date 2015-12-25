@@ -2,25 +2,26 @@
 <html>
 
 <head>
-	<title>Set Page Color Popup</title>
+	<title>InjectedSearch Settings</title>
 	<link rel="stylesheet" type="text/css" href="popup.css">
 	<script src="jquery-2.1.4.min.js"></script>
+	<script src="popup.js"></script>
 </head>
 
 <body>
-	<h2 style="margin-left: 10px;"> Settings</h2>
+	<h2 style="margin: 0; color: white; padding: 3px 0 5px 10px; background: rgb(32, 80, 129);"> Settings</h2>
 	<div class="inputdiv">
 		<div class="inputfield">
 			<b>Username:</b>
-			<input type="text" id="username">
+			<input class = "input inputfield" type="text" id="username">
 		</div>
 		<div class="inputfield">
 			<b>Password:</b>
-			<input type="password" id="password">
+			<input class = "input inputfield" type="password" id="password">
 		</div>
 		<div class="inputfield">
 			<b>Sever URL:</b>
-			<input type="text" id="url">
+			<input class = "input inputfield" type="text" id="url">
 		</div>
 		<div class="inputfield">
 			<b>Space Name:</b>
@@ -29,7 +30,8 @@
 		<button id="saveBtn">Save</button>
 		<button id="cancelBtn">Cancel</button>
 	</div>
-	<script src="popup.js"></script>
+	<h6 style = "margin: 0; padding-left: 30%;"> Confluence Version: 5.4.3 </h6>
+	
 </body>
 
 </html>
