@@ -1,7 +1,7 @@
 
 var WIN_WIDTH = $(window).width();
 var WIN_HEIGHT = $(window).height();
-var PAGE_HEIGHT = $("body").height();
+var PAGE_HEIGHT = $(document).height();
 var DIALOG_WIDTH = WIN_WIDTH * 0.2;
 var DIALOG_HEIGHT = WIN_HEIGHT * 0.25;
 

@@ -101,7 +101,7 @@ function getSearchString(input) {
 			}
 		} 
 	});
-	return tempString;
+	return encodeURI(tempString);
 }
 
 // read local storage for searching
@@ -169,7 +169,7 @@ function sendRESTCall(searchString, tabId) {
 			// });
 		},
 		error: function (xhr, errorText) {
-			createModalDialog("ERROR", "Connection failed: Cannot fetch confluence results.");
+			createModalDialog("ERROR", "Connection failed: Cannot fetch confluence results.", tabId);
 		}
 	});
 }
@@ -255,22 +255,20 @@ function createContentDetails(tabId, item) {
 }
 
 // create a dialog in current tab by using injected script
-function createModalDialog(caption, msg) {
-	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-		chrome.tabs.executeScript(tabs[0].id, { file: "jquery-2.1.4.min.js" }, function () {
-			chrome.tabs.executeScript(tabs[0].id, 
-			{ 
-				code: "var msg = '" + msg + "';" 
-			   +"var caption= '" + caption + "';"
+function createModalDialog(caption, msg, tabId) {
+	chrome.tabs.executeScript(tabId, { file: "jquery-2.1.4.min.js" }, function () {
+		chrome.tabs.executeScript(tabId,
+			{
+				code: "var msg = '" + msg + "';"
+				+ "var caption= '" + caption + "';"
 			}, function () {
-				chrome.tabs.executeScript(tabs[0].id, { file: "modalDialog.js" }, function () {
+				chrome.tabs.executeScript(tabId, { file: "modalDialog.js" }, function () {
 					// !important: window.close() should be called in here which is in this callback
 					// otherwise, the window will not function well
 					window.close();
 				});
-			});
-		});
-
+			}
+		);
 	});
 }
 

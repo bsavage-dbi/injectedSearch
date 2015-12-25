@@ -17,10 +17,6 @@ chrome.runtime.onMessage.addListener(function (msg, _, sendResponse) {
 		case "INSERT_ITEM":
 			setTimeout(function() {addItemContentBlock(msg.itemInfo)}, 1000);
 			break;
-		case "MODAL_DIALOG":
-			alert("in");
-			addModalDialog(msg.greeting);
-			break;
 	}
 });
 
@@ -215,9 +211,4 @@ function highlightString(str) {
 		result = result.replace(reg, "<span style = 'background-color : yellow'>" + key + "</span>");
 	});
 	return result;
-}
-
-// create ModalDialog to show message
-function addModalDialog(msg) {
-	alert(msg);
 }
