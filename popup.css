@@ -13,7 +13,7 @@ div.inputfield {
 	height: 30px;
 }
 
-b {
+.inputfield b {
 	margin: 3px;
 	float: left;
 	display: block;
@@ -26,7 +26,7 @@ b {
 
 .inputdiv {
 	margin: 5px 5px 5px 0px;
-	padding-left: 20px;
+	padding-left: 10px;
 	float: right;
 }
 	
@@ -42,4 +42,9 @@ button {
 
 .info {
 	margin: 0 0 0 5px;
+}
+
+#switchText {
+	margin-top: 0px;
+	font-family: Arial,sans-serif;
 }

@@ -11,13 +11,16 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
 
 // chrome event when current tab is updated
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-	if (changeInfo.status == "complete") {
-		var searchString = getSearchString(tab.url);
-		if (searchString !== "") {
-			// first read local storage then send REST GET request
-			readLocalStorage(searchString, tabId);
+	chrome.storage.local.get(settings, function (result) {
+		settings = result;
+		if (settings["on"] && changeInfo.status == "complete") {
+			var searchString = getSearchString(tab.url);
+			if (searchString !== "") {
+				// first read local storage then send REST GET request
+				readLocalStorage(searchString, tabId);
+			}
 		}
-	}
+	});
 });
 
 // // chrome webnavigation
@@ -42,7 +45,11 @@ settings["usr"] = "";
 settings["pwd"] = "";
 settings["space"] = "";
 settings["url"] = "";
+settings["on"] = true;
 var authStr = "";
+
+// switch flag to indicate state of the listener
+var switchFlag;
 
 // REST url prefix
 var _prefix = "";
@@ -69,24 +76,20 @@ var searchEngines = [
 
 // read local setting when start
 chrome.runtime.onInstalled.addListener(function() {
-//	alert("Installed");
+	settings["usr"] = "chaiyi";
+	settings["pwd"] = "chaiyi123";
+	settings["url"] = "http://172.20.200.191:8003/";
+	settings["on"] = true;
+	settings["space"] = "ALL";
+	chrome.storage.local.set(settings);
 });
 chrome.runtime.onStartup.addListener(function() {
-	alert("start");
 	chrome.storage.local.get(settings, function (result) {
 		settings = result;
-		if (settings["usr"] === "" || settings["pwd"] === "" || settings["url"] === "") {
-			alert("wat");
-			////////////////////////////////////////////////////////////////////////////////!!!!!
-			settings["usr"] = "chaiyi";
-			settings["pwd"] = "chaiyi123";
-			settings["space"] = "all";
-			settings["url"] = "http://172.20.200.191:8003/";
-			////////////////////////////////////////////////////////////////////////////////!!!!!
-		}
 	});
 });
 
+//
 function getSearchString(input) {
 	var tempString = "";
 	$.each(searchEngines, function(id, item) {
@@ -134,7 +137,7 @@ function sendRESTCall(searchString, tabId) {
 	// set name and password, (!!! if browser has already logged in Confluence, this field is invalid.)
 	authStr = "Basic " + btoa(settings["usr"] + ":" + settings["pwd"]);
 	// set search space name
-	if (settings["space"] !== "all" && settings["space"] !== "") {
+	if (settings["space"] !== "ALL" && settings["space"] !== "") {
 		url += ("&spaceKey=" + settings["space"]);
 	}
 	
@@ -163,10 +166,6 @@ function sendRESTCall(searchString, tabId) {
 					
 			// for each item, send REST call to query information
 			getContentDetails(tabId, data.result, 0);
-			
-			// $.each(data.result, function (index, item) {
-			// 	createContentDetails(tabId, item);
-			// });
 		},
 		error: function (xhr, errorText) {
 			createModalDialog("ERROR", "Connection failed: Cannot fetch confluence results.", tabId);
@@ -212,44 +211,7 @@ function getContentDetails(tabId, items, index, length) {
 				getContentDetails(tabId, items, index+1);
 		},
 		error: function (xhr, errorText) {
-			alert("failed");
 			getContentDetails(tabId, items, index+1);
-		}
-	});
-}
-
-
-// GET content detail from Confluence for every search result
-function createContentDetails(tabId, item) {
-	var url = _prefix + "content/" + item.id;
-	
-	// send rest call
-	$.ajax({
-		type: "GET",
-		url: url,
-		dataType: "json",
-		beforeSend: function (xhr) {
-			// authorization name and password encoded by btoa
-			xhr.setRequestHeader("Authorization", authStr);//"Basic Y2hhaXlpOmNoYWl5aTEyMw==");
-		},
-		success: function (data) {
-			// if succeed send message to content.js
-			// tabId and searching result by JSON
-			chrome.tabs.sendMessage(tabId,
-				{
-					tag: "INSERT_ITEM",
-					itemInfo:
-					{
-						id: item.id,
-						title: item.title,
-						url: item.link[0].href,
-						html: data.body.value,
-						date: data.lastModifiedDate.friendly
-					}
-				});
-		},
-		error: function (xhr, errorText) {
-			alert("failed");
 		}
 	});
 }

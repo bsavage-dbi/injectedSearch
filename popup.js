@@ -3,6 +3,7 @@ $(document).ready(function () {
 		 
 	// settings
 	var settings = {};
+	settings["on"] = true;
 	settings["usr"] = "";
 	settings["pwd"] = "";
 	settings["space"] = "";
@@ -13,6 +14,16 @@ $(document).ready(function () {
 	// get space names
 	getSpacesNames();
 
+	// switch changing callback
+	$("#switchExt").change(function() {
+		var tSwitchState = $("#switchExt").prop("checked");
+		if (tSwitchState) {
+			$("#switchText").text("Injected Search is ON");
+		} else {
+			$("#switchText").text("Injected Search is OFF");
+		}
+	});
+
 	// save current setting
 	$("#saveBtn").click(function () {
 		// get current setting
@@ -20,24 +31,13 @@ $(document).ready(function () {
 		settings["pwd"] = $("#password").val();
 		settings["url"] = $("#url").val();
 		settings["space"] = $("#spaces").val();
-		
-		chrome.storage.local.set(settings, function () {
-			$.ajax({
-			type: "GET",
-			url: settings["url"]  + "rest/prototype/1/space",
-			dataType: "json",
-			beforeSend: function (xhr) {
-				// authorization name and password encoded by btoa
-				// set name and password, (!!! if browser has already logged in Confluence, this field is invalid.)
-				var authStr = "Basic " + btoa(settings["usr"] + ":" + settings["pwd"]);
-				xhr.setRequestHeader("Authorization", authStr);
-			},
-			success: function (data) {
-				createModalDialog("SUCCESS", "Saving successfully!");
-			},
-			error: function(xhr, errorText) {
-				createModalDialog("ERROR", "Saving error: URL INVALID!");
-			}});
+		settings["on"] = $("#switchExt").prop("checked");
+		chrome.storage.local.set(settings, function () {		
+			if (settings["on"])
+				chrome.browserAction.setIcon({ path: "icon.png" });
+			else
+				chrome.browserAction.setIcon({ path: "icon-stop-test.png" });
+			createModalDialog("SUCCESS", "Saving successfully!");
         });
 	});
 	
@@ -48,9 +48,28 @@ $(document).ready(function () {
 	
 	///////////////////////////////////////////////////////////////////////////
 	
+	// 
+	function setSwitchState() {
+		var tSwitchState = $("#switchExt").prop("checked");
+		// if not 
+		if (tSwitchState !== settings["on"]) {
+			settings["on"] = tSwitchState;
+			// send message to background to stop extension
+			chrome.runtime.sendMessage({tag: "SWITCH", value: tSwitchState}, function() {
+			});
+		}
+	}
+	
 	// get settings: name, password and default space name
 	function getDefaultSettings() {
-		chrome.storage.local.get(settings, function (result) {
+		chrome.storage.local.get(settings, function (result) {	
+			$("#switchExt").prop("checked", result["on"]);
+			if (result["on"]) {
+				$("#switchText").text("Injected Search is ON");
+			} else {
+				$("#switchText").text("Injected Search is OFF");
+			}
+
 			if (result["usr"] !== "" && result["pwd"] !== "") {
 				settings = result;
 				$("#username").val(result["usr"]);
@@ -64,20 +83,6 @@ $(document).ready(function () {
 				$("#spaces").val("all");
 			}
 		});
-	}
-	
-	// read current local settings
-	function readLocalSettings() {
-		chrome.storage.local.get(settings, function(result) {
-			settings = result;
-			if (settings["usr"] === "" || settings["pwd"] === "") {
-				////////////////////////////////////////////////////////////////////////////////!!!!!
-				settings["usr"] = "chaiyi";
-				settings["pwd"] = "chaiyi123";
-				settings["space"] = "all";
-				////////////////////////////////////////////////////////////////////////////////!!!!!
-			}
-		}); 
 	}
 	
 	// get space names to create selection list
@@ -96,8 +101,8 @@ $(document).ready(function () {
 			success: function (data) {
 				// add 'all content' option
 				$("#spaces").append($('<option/>', {
-					value: "all",
-					text: "all"
+					value: "ALL",
+					text: "ALL"
 				}));
 				
 				// add each space name option in server
